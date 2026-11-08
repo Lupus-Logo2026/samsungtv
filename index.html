@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Start</title>
+<style>
+  /* Alle Größen in vw/vh: skaliert automatisch auf 1080p- und 4K-Viewports */
+  :root {
+    --bg: #050507;
+    --text: #f5f5f7;
+    --muted: rgba(245, 245, 247, .5);
+    --glass: rgba(255, 255, 255, .08);
+    --gap: 2vw;
+    --radius: 1.6vw;
+  }
+
+  * { box-sizing: border-box; margin: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    background: radial-gradient(120vw 70vh at 50% -10%, #1b1c26 0%, var(--bg) 70%) no-repeat, var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Inter, Roboto, Arial, sans-serif;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    padding: 5vh 5vw;
+  }
+
+  /* Uhr */
+  header { text-align: center; padding-top: 2vh; }
+  #time {
+    font-size: 13vw;
+    font-weight: 200;
+    letter-spacing: -.02em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  #date {
+    margin-top: 1.2vw;
+    font-size: 2vw;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  /* Kachel-Bereich */
+  main {
+    display: grid;
+    align-content: center;
+    gap: 3.5vw;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--gap);
+  }
+  h2 {
+    grid-column: 1 / -1;
+    font-size: 1.5vw;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: -.4vw;
+  }
+
+  .tile {
+    display: flex;
+    align-items: flex-end;
+    height: 12vw;
+    padding: 1.8vw;
+    border: 0;
+    border-radius: var(--radius);
+    color: var(--text);
+    font: inherit;
+    font-size: 2.4vw;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+    background: var(--glass);
+    transition: transform .25s ease, box-shadow .25s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tile small {
+    display: block;
+    margin-top: .3vw;
+    font-size: 1.3vw;
+    font-weight: 400;
+    opacity: .6;
+  }
+
+  /* Fokus wie bei Apple TV: anheben, vergrößern, heller Rand */
+  .tile:hover,
+  .tile:focus {
+    outline: none;
+    transform: scale(1.08);
+    box-shadow: 0 0 0 .22vw rgba(255, 255, 255, .9), 0 2vw 5vw rgba(0, 0, 0, .7);
+  }
+
+  .netflix { background: linear-gradient(145deg, #3a0a0d, #e50914); }
+  .youtube { background: linear-gradient(145deg, #4a0b0b, #ff1a1a); }
+  .prime   { background: linear-gradient(145deg, #062a3d, #00a8e1); }
+  .waipu   { background: linear-gradient(145deg, #072e4a, #1aa7e8); }
+  .hdmi    { background: var(--glass); }
+  .hdmi:hover, .hdmi:focus { background: rgba(255, 255, 255, .16); }
+
+  /* Hinweis für HDMI-Kacheln */
+  #hint {
+    position: fixed;
+    left: 50%;
+    bottom: 5vh;
+    transform: translate(-50%, 2vw);
+    padding: 1.2vw 2.4vw;
+    border-radius: 99px;
+    background: rgba(40, 40, 46, .95);
+    font-size: 1.6vw;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  #hint.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div id="time">--:--</div>
+  <div id="date"></div>
+</header>
+
+<main>
+  <section class="row" aria-label="Streaming">
+    <h2>Streaming</h2>
+    <a class="tile netflix" href="https://www.netflix.com">Netflix</a>
+    <a class="tile youtube" href="https://www.youtube.com/tv">YouTube</a>
+    <a class="tile prime"   href="https://www.primevideo.com">Prime Video</a>
+    <a class="tile waipu"   href="https://wtv.waipu.tv">waipu.tv</a>
+  </section>
+
+  <!-- Namen der Eingänge hier anpassen -->
+  <section class="row" aria-label="Eingänge">
+    <h2>Eingänge</h2>
+    <button class="tile hdmi" data-input="HDMI 1">HDMI 1<small>Konsole</small></button>
+    <button class="tile hdmi" data-input="HDMI 2">HDMI 2<small>Receiver</small></button>
+    <button class="tile hdmi" data-input="HDMI 3">HDMI 3<small>Apple TV</small></button>
+    <button class="tile hdmi" data-input="HDMI 4">HDMI 4<small>PC</small></button>
+  </section>
+</main>
+
+<div id="hint" role="status"></div>
+
+<script>
+  // Uhr
+  var timeEl = document.getElementById('time');
+  var dateEl = document.getElementById('date');
+  function tick() {
+    var d = new Date();
+    var h = ('0' + d.getHours()).slice(-2);
+    var m = ('0' + d.getMinutes()).slice(-2);
+    timeEl.textContent = h + ':' + m;
+    dateEl.textContent = d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  // Fernbedienung: Pfeiltasten springen durch das Raster (4 Spalten)
+  var tiles = Array.prototype.slice.call(document.querySelectorAll('.tile'));
+  var COLS = 4;
+  tiles[0].focus();
+  document.addEventListener('keydown', function (e) {
+    var i = tiles.indexOf(document.activeElement);
+    if (i < 0) { tiles[0].focus(); return; }
+    var next = i;
+    if (e.keyCode === 37) next = i - 1;       // links
+    else if (e.keyCode === 39) next = i + 1;  // rechts
+    else if (e.keyCode === 38) next = i - COLS; // hoch
+    else if (e.keyCode === 40) next = i + COLS; // runter
+    else return;
+    if (next >= 0 && next < tiles.length) tiles[next].focus();
+    e.preventDefault();
+  });
+
+  // Ein Browser kann den HDMI-Eingang nicht umschalten – daher nur ein Hinweis
+  var hint = document.getElementById('hint');
+  var hintTimer;
+  document.querySelectorAll('.hdmi').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      hint.textContent = 'Taste „Quelle“ drücken und ' + btn.getAttribute('data-input') + ' wählen';
+      hint.classList.add('show');
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(function () { hint.classList.remove('show'); }, 4000);
+    });
+  });
+</script>
+</body>
+</html>
